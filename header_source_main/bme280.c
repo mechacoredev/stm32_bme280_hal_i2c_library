@@ -210,14 +210,14 @@ static bool bme280_read_sensor_register(int32_t *temperature, uint32_t *pressure
 
 BME280_Init_Status BME280_Init(I2C_HandleTypeDef *hi2cx, bool is_dma_open){
 	uint8_t registerbuffer;
-	for(uint8_t add=0; add<2; add++){
+	for(uint8_t add=0; add<3; add+=2){
 		if(HAL_I2C_IsDeviceReady(hi2cx, (236 + add), 1, timeout)==HAL_OK){
 			BME280_Handle.addr=(236+add);
 			BME280_Handle.i2c=hi2cx;
 			break;
 		}
 	}
-	if(BME280_Handle.addr!=236 && BME280_Handle.addr!=237){
+	if(BME280_Handle.addr!=236 && BME280_Handle.addr!=238){
 		return Device_not_found;
 	}
 	if(!bme280_writeregister(BME280_RESET_ADDR, (uint8_t*)BME280_RESET_CMMND, 1)){
@@ -317,3 +317,4 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
         BME280_parameters.dma_transfer_complete=1;
     }
 }
+
