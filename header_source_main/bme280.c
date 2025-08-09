@@ -99,6 +99,16 @@ void inline _bme280_calculate_values(BME280_t *dev)
 /* PUBLIC (API) FUNCTIONS                                                         */
 /*================================================================================*/
 
+uint8_t BME280_AutoDetect(BME280_t *dev, I2C_HandleTypeDef *i2c_handle){
+	if(HAL_I2C_IsDeviceReady(i2c_handle, 236, 1, HAL_MAX_DELAY)==HAL_OK){
+		return 236;
+	}else if(HAL_I2C_IsDeviceReady(i2c_handle, 238, 1, HAL_MAX_DELAY)==HAL_OK){
+		return 238;
+	}else{
+		return 0;
+	}
+}
+
 BME280_Status_t BME280_Init(BME280_t *dev, I2C_HandleTypeDef *i2c_handle, uint8_t addr)
 {
 
@@ -228,4 +238,3 @@ BME280_Status_t inline BME280_ReadSensor_DMA(BME280_t *dev){
 	}
 	return BME280_OK;
 }
-
