@@ -177,23 +177,23 @@ BME280_Status_t BME280_Configure(BME280_t *dev, BME280_Config_t *config)
 
     uint8_t reg_data_hum, reg_data_meas, reg_data_config;
 
-    // Ayarları geçici değişkenlerde birleştir
+
     reg_data_hum = config->oversampling_humidity;
     reg_data_config = (uint8_t)((config->standby_time << 5) | (config->filter << 2));
     reg_data_meas = (uint8_t)((config->oversampling_temperature << 5) | (config->oversampling_pressure << 2) | (config->mode));
 
-    // Değişiklikleri uygulamak için önce SLEEP moduna geçmek en güvenlisidir.
+
     uint8_t current_mode = reg_data_meas & 0x03;
     if (current_mode != BME280_MODE_SLEEP)
     {
-        uint8_t temp_meas = reg_data_meas & 0xFC; // Mod bitlerini sıfırla
+        uint8_t temp_meas = reg_data_meas & 0xFC;
         if (_bme280_write_register(dev, BME280_REG_CTRL_MEAS, &temp_meas, 1) != BME280_OK)
         {
             return BME280_ERROR_COMM;
         }
     }
 
-    // Şimdi ayarları yaz
+
     if (_bme280_write_register(dev, BME280_REG_CTRL_HUM, &reg_data_hum, 1) != BME280_OK)
     {
         return BME280_ERROR_COMM;
@@ -217,7 +217,7 @@ BME280_Status_t BME280_ReadSensor_Polling(BME280_t *dev)
         return BME280_ERROR_COMM;
     }
 
-    _bme280_calculate_values(dev); // Hesaplamayı yap
+    _bme280_calculate_values(dev);
     return BME280_OK;
 }
 
