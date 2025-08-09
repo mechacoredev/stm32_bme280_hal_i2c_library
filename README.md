@@ -1,87 +1,54 @@
-## Introduction
+# BME280 Driver for STM32 HAL
 
-This is an **ultimate user-friendly** BME280 sensor library designed for **STM32 HAL Library** users. By abstracting the complex sensor logic, it allows even beginners to start reading sensor data within minutes. The library supports both `Polling` and `DMA` modes, offering flexibility and efficient resource management.
+A professional, handle-based C library for the Bosch BME280 Temperature, Pressure, and Humidity sensor, designed for STM32 microcontrollers using the HAL library.
 
-## Key Features
+This library was co-developed by **Enes E.** and Gemini, focusing on robust, reusable, and efficient code for embedded systems.
 
-- **Effortless Initialization:** The sensor can be initialized with a single function call, abstracting all low-level configurations.
-- **Dual Mode Support:** Seamlessly switch between `Polling` (blocking) and `DMA` (non-blocking) communication modes with a simple boolean flag.
-- **Optimized for Performance:** The DMA-based approach offloads data transfer from the CPU, making it perfect for time-critical applications.
-- **Minimalist Footprint:** The library is written to be as lightweight as possible, containing only the essential code to get the job done.
-- **Easy Debugging:** The `BME280_Init` function returns a status code (`BME280_Init_Status`) that clearly indicates the cause of any initialization failure, simplifying the debugging process for the user.
+## Why Use This Library? (Advantages)
 
-## Getting Started
+This library is built with modern embedded software design principles to be both powerful and easy to use.
 
-### Prerequisites
-You need an STM32 project configured with the HAL library. Ensure that your selected `I2C` peripheral and the corresponding `DMA` stream for I2C RX are enabled and configured correctly in STM32CubeMX.
-**Important:** This library is currently configured to include `stm32f4xx_hal.h`. If you are using a different STM32 family (e.g., STM32F7, STM32L4), please change the `#include` directive in the `bme280.h` file accordingly.
+-   **➡️ Handle-Based Architecture (Multi-Device Ready)**
+    -   No global variables are used. You can create as many `BME280_t` objects as you need to manage multiple sensors simultaneously, even on the same I2C bus. This makes the code clean and highly reusable across projects.
 
-### Installation
-1.  Copy the `bme280.h` and `bme280.c` files into your project's `Inc` and `Src` folders, respectively.
-2.  Include `bme280.h` in your `main.c` file.
-3.  Ensure that the `HAL_I2C_MemRxCpltCallback` function is defined only once in the project (the library already provides a definition).
+-   **➡️ Dual Communication Modes**
+    -   **Polling Mode:** A simple, blocking `ReadSensor_Polling()` function for quick and easy implementation.
+    -   **Continuous DMA Mode:** A highly efficient, non-blocking `ReadSensor_DMA_Start()` system. It continuously updates sensor data in the background using interrupts with almost zero CPU overhead, leaving your main loop free for other tasks.
 
-### Usage Example
-Below is a minimal `main.c` example demonstrating how to initialize the library in DMA mode and read sensor data in the main loop.
+-   **➡️ Smart and Robust**
+    -   **Auto-Detection:** The `BME280_Init()` function can automatically scan for the sensor at its primary (0x76) or secondary (0x77) I2C address if you pass `0`.
+    -   **Error Handling:** Functions return a `BME280_Status_t` code, allowing you to check for communication failures or hardware issues instead of letting your program crash silently.
 
-```c
-// main.c
-#include "main.h"
-#include "bme280.h"
+-   **➡️ Clean and Well-Documented API**
+    -   The public functions are intuitive and the `bme280.h` header file is fully commented in Doxygen format for clarity.
 
-I2C_HandleTypeDef hi2c1;
-DMA_HandleTypeDef hdma_i2c1_rx;
+## Setup
 
-bool dma_state=true;
-float temp,pres,humi;
+#### 1. Add Files to Project
+-   Copy `bme280.h` into your project's `Core/Inc` directory.
+-   Copy `bme280.c` into your project's `Core/Src` directory.
+-   Include the header in your `main.c`: `#include "bme280.h"`
 
-int main(void) {
-    HAL_Init();
-    SystemClock_Config();
-    MX_GPIO_Init();
-    MX_DMA_Init();
-    MX_I2C1_Init();
+#### 2. STM32CubeMX Configuration
+-   Enable an **I2C** peripheral (e.g., I2C1).
+-   **For DMA Mode**, you must also:
+    -   In I2C Settings -> **DMA Settings** tab, add a DMA request for **I2C_RX**.
+    -   In System Core -> **NVIC** tab, enable the **`I2C event interrupt`**.
 
-    // The library is initialized with a single function call.
-    BME280_Init_Status status = BME280_Init(&hi2c1, dma_state);
-    if (status != Init_OK) {
-        // Handle initialization error
-        Error_Handler();
-    }
-    HAL_Delay(100);
+## Basic Usage Workflow
 
-    while (1) {
-        BME280_ReadSensor(&temp, &pres, &humi);
-        HAL_Delay(50);
-    }
-}
-//... (Rest of the CubeMX generated code)
-Contributing
-If you'd like to contribute, feel free to open a pull request or report any issues.
+The general workflow is simple:
 
-License
-This project is licensed under the MIT License
+1.  Create a `BME280_t` device object and a `BME280_Config_t` configuration object.
+2.  Call `BME280_Init()` to initialize the sensor handle.
+3.  Fill your `BME280_Config_t` object with your desired settings (mode, filter, etc.).
+4.  Call `BME280_Configure()` to apply the settings to the sensor.
+5.  Choose your reading method:
+    -   Call `BME280_ReadSensor_Polling()` whenever you need a reading.
+    -   Or, call `BME280_ReadSensor_DMA_Start()` **once** to begin the continuous background updates. In your main loop, simply check the `dev->data_ready` flag to see when new data is available.
+
+**For a complete, working example, please refer to the `main.c` file in this repository.**
 
 ## License
 
-MIT License
-
-Copyright (c) 2025 Enes E.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This project is licensed under the MIT License.
