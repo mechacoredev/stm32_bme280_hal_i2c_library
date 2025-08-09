@@ -16,7 +16,7 @@ This library is built with modern embedded software design principles to be both
     -   **Continuous DMA Mode:** A highly efficient, non-blocking `ReadSensor_DMA_Start()` system. It continuously updates sensor data in the background using interrupts with almost zero CPU overhead, leaving your main loop free for other tasks.
 
 -   **➡️ Smart and Robust**
-    -   **Auto-Detection:** The `BME280_Init()` function can automatically scan for the sensor at its primary (0x76) or secondary (0x77) I2C address if you pass `0`.
+    -   **Auto-Detection:** The `BME280_AutoDetect` function can automatically scan for the sensor at its primary (0x76) or secondary (0x77) I2C address.
     -   **Error Handling:** Functions return a `BME280_Status_t` code, allowing you to check for communication failures or hardware issues instead of letting your program crash silently.
 
 -   **➡️ Clean and Well-Documented API**
@@ -52,3 +52,4 @@ The general workflow is simple:
 ## License
 
 This project is licensed under the MIT License.
+
