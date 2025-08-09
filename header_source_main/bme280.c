@@ -1,7 +1,7 @@
 /**
  * @file       bme280.c
  * @brief      Source file for the BME280 sensor library.
- * @author     Enes E. & Gemini
+ * @author     Enes E.
  * @date       Aug 9, 2025
  */
 
@@ -228,3 +228,4 @@ BME280_Status_t inline BME280_ReadSensor_DMA(BME280_t *dev){
 	}
 	return BME280_OK;
 }
+
