@@ -132,20 +132,8 @@ BME280_Status_t BME280_ReadSensor_Polling(BME280_t *dev);
 
 BME280_Status_t BME280_ReadSensor_DMA_Start(BME280_t *dev);
 
-void BME280_I2C_Callback(I2C_HandleTypeDef *hi2c); 
-
-void _bme280_calculate_values(BME280_t *dev);
-
-uint32_t compensate_humidity(BME280_t *dev, int32_t adc_H);
-
-uint32_t compensate_pressure(BME280_t *dev, int32_t adc_P);
-
-int32_t compensate_temperature(BME280_t *dev, int32_t adc_T);
-
-uint8_t BME280_AutoDetect(BME280_t *dev, I2C_HandleTypeDef *i2c_handle);
+uint8_t BME280_AutoDetect(I2C_HandleTypeDef *i2c_handle);
 
 BME280_Status_t BME280_ReadSensor_DMA(BME280_t *dev);
 
 #endif /* BME280_H_ */
-
-
