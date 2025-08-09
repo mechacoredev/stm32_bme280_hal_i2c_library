@@ -42,7 +42,7 @@ static BME280_Status_t _bme280_write_register(BME280_t *dev, uint8_t reg_addr, u
 /* COMPENSATION FORMULAS (FROM BOSCH DATASHEET)                                   */
 /*================================================================================*/
 
-int32_t inline compensate_temperature(BME280_t *dev, int32_t adc_T)
+static int32_t inline compensate_temperature(BME280_t *dev, int32_t adc_T)
 {
     int32_t var1, var2, T;
     var1 = ((((adc_T >> 3) - ((int32_t)dev->dig_T1 << 1))) * ((int32_t)dev->dig_T2)) >> 11;
@@ -52,7 +52,7 @@ int32_t inline compensate_temperature(BME280_t *dev, int32_t adc_T)
     return T;
 }
 
-uint32_t inline compensate_pressure(BME280_t *dev, int32_t adc_P)
+static uint32_t inline compensate_pressure(BME280_t *dev, int32_t adc_P)
 {
     int64_t var1, var2, p;
     var1 = ((int64_t)dev->t_fine) - 128000;
@@ -70,7 +70,7 @@ uint32_t inline compensate_pressure(BME280_t *dev, int32_t adc_P)
     return (uint32_t)p;
 }
 
-uint32_t inline compensate_humidity(BME280_t *dev, int32_t adc_H)
+static uint32_t inline compensate_humidity(BME280_t *dev, int32_t adc_H)
 {
     int32_t v_x1_u32r;
     v_x1_u32r = (dev->t_fine - ((int32_t)76800));
@@ -84,7 +84,7 @@ uint32_t inline compensate_humidity(BME280_t *dev, int32_t adc_H)
     return (uint32_t)(v_x1_u32r >> 12);
 }
 
-void inline _bme280_calculate_values(BME280_t *dev)
+void inline static _bme280_calculate_values(BME280_t *dev)
 {
     int32_t adc_P = (int32_t)(((uint32_t)dev->raw_data[0] << 12) | ((uint32_t)dev->raw_data[1] << 4) | ((uint32_t)dev->raw_data[2] >> 4));
     int32_t adc_T = (int32_t)(((uint32_t)dev->raw_data[3] << 12) | ((uint32_t)dev->raw_data[4] << 4) | ((uint32_t)dev->raw_data[5] >> 4));
@@ -99,7 +99,7 @@ void inline _bme280_calculate_values(BME280_t *dev)
 /* PUBLIC (API) FUNCTIONS                                                         */
 /*================================================================================*/
 
-uint8_t BME280_AutoDetect(BME280_t *dev, I2C_HandleTypeDef *i2c_handle){
+uint8_t BME280_AutoDetect(I2C_HandleTypeDef *i2c_handle){
 	if(HAL_I2C_IsDeviceReady(i2c_handle, 236, 1, HAL_MAX_DELAY)==HAL_OK){
 		return 236;
 	}else if(HAL_I2C_IsDeviceReady(i2c_handle, 238, 1, HAL_MAX_DELAY)==HAL_OK){
