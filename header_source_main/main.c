@@ -50,6 +50,7 @@ float temp, pres, hum;
 BME280_t my_sensor;
 BME280_Config_t my_config;
 BME280_Status_t bmestat, bmeconfig, bmedmastat;
+uint8_t BME280add=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,7 +100,8 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   HAL_Delay(50);
-  bmestat=BME280_Init(&my_sensor, &hi2c1, 236);
+  BME280add=BME280_AutoDetect(&my_sensor, &hi2c1);
+  bmestat=BME280_Init(&my_sensor, &hi2c1, BME280add);
   my_config.mode = BME280_MODE_NORMAL;
   my_config.filter = BME280_FILTER_OFF;
   my_config.oversampling_pressure = BME280_OVERSAMPLING_X4;
