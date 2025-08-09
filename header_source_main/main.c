@@ -99,8 +99,9 @@ int main(void)
   MX_DMA_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(100);
-  bmestat=BME280_Init(&my_sensor, &hi2c1, 236);
+  HAL_Delay(50);
+  BME280add=BME280_AutoDetect(&hi2c1);
+  bmestat=BME280_Init(&my_sensor, &hi2c1, BME280add);
   my_config.mode = BME280_MODE_NORMAL;
   my_config.filter = BME280_FILTER_OFF;
   my_config.oversampling_pressure = BME280_OVERSAMPLING_X4;
@@ -109,7 +110,7 @@ int main(void)
   my_config.standby_time = BME280_STANDBY_250_MS;
   bmeconfig=BME280_Configure(&my_sensor, &my_config);
   bmedmastat=BME280_ReadSensor_DMA_Start(&my_sensor);
-  HAL_Delay(100);
+  HAL_Delay(50);
   /* USER CODE END 2 */
 
   /* Infinite loop */
