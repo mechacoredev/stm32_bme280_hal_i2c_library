@@ -41,7 +41,7 @@
 typedef enum {
     BME280_MODE_SLEEP  = 0x00,
     BME280_MODE_FORCED = 0x01,
-    BME280_MODE_NORMAL = 0x11
+    BME280_MODE_NORMAL = 0x03
 } BME280_Mode;
 
 typedef enum {
@@ -147,3 +147,4 @@ uint8_t BME280_AutoDetect(BME280_t *dev, I2C_HandleTypeDef *i2c_handle);
 BME280_Status_t BME280_ReadSensor_DMA(BME280_t *dev);
 
 #endif /* BME280_H_ */
+
