@@ -84,17 +84,6 @@ static uint32_t inline compensate_humidity(BME280_t *dev, int32_t adc_H)
     return (uint32_t)(v_x1_u32r >> 12);
 }
 
-void inline static _bme280_calculate_values(BME280_t *dev)
-{
-    int32_t adc_P = (int32_t)(((uint32_t)dev->raw_data[0] << 12) | ((uint32_t)dev->raw_data[1] << 4) | ((uint32_t)dev->raw_data[2] >> 4));
-    int32_t adc_T = (int32_t)(((uint32_t)dev->raw_data[3] << 12) | ((uint32_t)dev->raw_data[4] << 4) | ((uint32_t)dev->raw_data[5] >> 4));
-    int32_t adc_H = (int32_t)(((uint32_t)dev->raw_data[6] << 8) | dev->raw_data[7]);
-
-    dev->temperature = (float)compensate_temperature(dev, adc_T) / 100.0f;
-    dev->pressure = (float)compensate_pressure(dev, adc_P) / 25600.0f;
-    dev->humidity = (float)compensate_humidity(dev, adc_H) / 1024.0f;
-}
-
 /*================================================================================*/
 /* PUBLIC (API) FUNCTIONS                                                         */
 /*================================================================================*/
@@ -216,12 +205,10 @@ BME280_Status_t BME280_ReadSensor_Polling(BME280_t *dev)
     {
         return BME280_ERROR_COMM;
     }
-
-    _bme280_calculate_values(dev);
     return BME280_OK;
 }
 
-BME280_Status_t BME280_ReadSensor_DMA_Start(BME280_t *dev)
+BME280_Status_t BME280_ReadSensor_DMA(BME280_t *dev)
 {
 	if(_bme280_read_register_dma(dev, BME280_REG_PRESS_MSB, dev->raw_data, 8) != BME280_OK)
 	{
@@ -230,11 +217,15 @@ BME280_Status_t BME280_ReadSensor_DMA_Start(BME280_t *dev)
 	return BME280_OK;
 }
 
-BME280_Status_t inline BME280_ReadSensor_DMA(BME280_t *dev){
-	_bme280_calculate_values(dev);
-	if(_bme280_read_register_dma(dev, BME280_REG_PRESS_MSB, dev->raw_data, 8) != BME280_OK)
-	{
-		return BME280_ERROR_COMM;
-	}
-	return BME280_OK;
+BME280_Status_t inline BME280_getValues(BME280_t *dev)
+{
+    int32_t adc_P = (int32_t)(((uint32_t)dev->raw_data[0] << 12) | ((uint32_t)dev->raw_data[1] << 4) | ((uint32_t)dev->raw_data[2] >> 4));
+    int32_t adc_T = (int32_t)(((uint32_t)dev->raw_data[3] << 12) | ((uint32_t)dev->raw_data[4] << 4) | ((uint32_t)dev->raw_data[5] >> 4));
+    int32_t adc_H = (int32_t)(((uint32_t)dev->raw_data[6] << 8) | dev->raw_data[7]);
+
+    dev->temperature = (float)compensate_temperature(dev, adc_T) / 100.0f;
+    dev->pressure = (float)compensate_pressure(dev, adc_P) / 256.0f / 100.0f;
+    dev->humidity = (float)compensate_humidity(dev, adc_H) / 1024.0f;
+
+    return BME280_OK;
 }
