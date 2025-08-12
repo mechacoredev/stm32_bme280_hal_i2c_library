@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bme280.h"
-#include "stdio.h"
 #include "stdbool.h"
 /* USER CODE END Includes */
 
@@ -45,11 +44,13 @@
 I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_rx;
 
+TIM_HandleTypeDef htim6;
+
 /* USER CODE BEGIN PV */
 float temp, pres, hum;
 BME280_t my_sensor;
 BME280_Config_t my_config;
-BME280_Status_t bmestat, bmeconfig, bmedmastat;
+BME280_Status_t bmestat, bmeconfig;
 uint8_t BME280add=0;
 /* USER CODE END PV */
 
@@ -58,6 +59,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -98,8 +100,8 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(50);
   BME280add=BME280_AutoDetect(&hi2c1);
   bmestat=BME280_Init(&my_sensor, &hi2c1, BME280add);
   my_config.mode = BME280_MODE_NORMAL;
@@ -109,8 +111,7 @@ int main(void)
   my_config.oversampling_humidity = BME280_OVERSAMPLING_X4;
   my_config.standby_time = BME280_STANDBY_250_MS;
   bmeconfig=BME280_Configure(&my_sensor, &my_config);
-  bmedmastat=BME280_ReadSensor_DMA_Start(&my_sensor);
-  HAL_Delay(50);
+  HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -205,6 +206,44 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 8399;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 2499;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -241,11 +280,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance==TIM6){
+    	BME280_ReadSensor_DMA(&my_sensor);
+	}
+}
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
 {
     if (hi2c->Instance == I2C1)
     {
-    	BME280_ReadSensor_DMA(&my_sensor);
+    	BME280_getValues(&my_sensor);
     }
 }
 /* USER CODE END 4 */
